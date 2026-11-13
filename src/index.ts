@@ -80,6 +80,8 @@ export const manifestSchema = z
     contractVersion: z.literal(CONTRACT_VERSION),
     name: z.string().min(1).max(100),
     description: z.string().max(500).optional(),
+    logoUrl: httpsUrl.optional(),
+    websiteUrl: httpsUrl.optional(),
     auth: z.discriminatedUnion("kind", [
       z.object({ kind: z.literal("NONE") }).strict(),
       z.object({ kind: z.literal("API_KEY") }).strict(),
