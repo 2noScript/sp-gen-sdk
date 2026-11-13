@@ -1,0 +1,35 @@
+{
+  "name": "@script-pro/generation-sdk",
+  "version": "0.1.0",
+  "type": "module",
+  "files": [
+    "dist",
+    "scripts",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "script-pro-plugin-build": "./scripts/build.mjs"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "esbuild": "0.25.12",
+    "zod": "^4.4.3",
+    "adm-zip": "0.6.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/2noScript/script-pro-generation-sdk.git"
+  }
+}

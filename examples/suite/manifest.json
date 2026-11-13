@@ -1,0 +1,59 @@
+{
+  "pluginId": "example-suite",
+  "name": "Example Suite",
+  "publisher": "2noScript",
+  "version": "0.1.0",
+  "contractVersion": 1,
+  "providers": [
+    {
+      "providerId": "EXAMPLE_IMAGE",
+      "version": "0.1.0",
+      "contractVersion": 1,
+      "name": "Example Image",
+      "auth": {
+        "kind": "NONE"
+      },
+      "operations": {
+        "IMAGE": {
+          "transport": "HTTP",
+          "models": [
+            {
+              "id": "example",
+              "label": "Example"
+            }
+          ],
+          "fields": []
+        }
+      },
+      "requestOrigins": [],
+      "mediaOrigins": [
+        "https://example.com"
+      ]
+    },
+    {
+      "providerId": "EXAMPLE_SECOND",
+      "version": "0.1.0",
+      "contractVersion": 1,
+      "name": "Example Second",
+      "auth": {
+        "kind": "NONE"
+      },
+      "operations": {
+        "IMAGE": {
+          "transport": "HTTP",
+          "models": [
+            {
+              "id": "example",
+              "label": "Example"
+            }
+          ],
+          "fields": []
+        }
+      },
+      "requestOrigins": [],
+      "mediaOrigins": [
+        "https://example.com"
+      ]
+    }
+  ]
+}
