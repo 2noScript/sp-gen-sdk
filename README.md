@@ -5,7 +5,7 @@ A publisher can release several plugins. Each plugin package can contain one or 
 Install the SDK in the plugin project, declare provider handlers with `defineProvider`, and export the package with `definePlugin`.
 
 ```sh
-npm install --save-dev https://github.com/2noScript/script-pro-generation-sdk/releases/download/v0.1.1/script-pro-generation-sdk-0.1.1.tgz
+npm install --save-dev https://github.com/2noScript/sp-gen-sdk/releases/download/v0.1.1/script-pro-generation-sdk-0.1.1.tgz
 npx script-pro-plugin-build manifest.json index.ts plugin.zip
 ```
 
