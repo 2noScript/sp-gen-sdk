@@ -1,54 +1,27 @@
-# Script-Pro Generation SDK
+# Generation SDK
 
-A publisher can release several plugins. Each plugin package can contain one or more providers. Provider authentication, parameters, and accounts are independent.
-
-Install the SDK in the plugin project, declare provider handlers with `defineProvider`, and export the package with `definePlugin`.
+Contract **2**, SDK **0.2.0**. Build independently downloadable Script-Pro generation plugins with one or several providers.
 
 ```sh
-npm install --save-dev https://github.com/2noScript/sp-gen-sdk/releases/download/v0.1.1/script-pro-generation-sdk-0.1.1.tgz
-npx script-pro-plugin-build manifest.json index.ts plugin.zip
+npm install --save-dev https://github.com/2noScript/sp-gen-sdk/releases/download/v0.2.0/script-pro-generation-sdk-0.2.0.tgz
+npx script-pro-plugin-build manifest.json src/index.ts dist/plugin.zip
 ```
 
-The package manifest contains `pluginId`, `name`, `publisher`, `version`, `contractVersion`, and a `providers` array. Each provider declares its own `providerId`, authentication mode, account fields, operations, and approved request and media origins. All providers use the package version.
+Export a package through `definePlugin` and typed handlers through `defineProvider`. Each provider declares its identity, operations, parameters, approved origins, optional `logoUrl`/`websiteUrl`, and authentication (`NONE`, `API_KEY`, or `BROWSER`). All providers in a package share its version.
 
-```ts
-import {
-  definePlugin,
-  defineProvider,
-  pluginManifestSchema
-} from '@script-pro/generation-sdk'
-import raw from './manifest.json'
+Provider-specific login checks, navigation, session interpretation, requests and responses belong to the plugin. The app exposes scoped resources:
 
-const manifest = pluginManifestSchema.parse(raw)
+- `host.page(script)`: evaluate on the selected profile's declared provider page.
+- `host.session('browser.cookies', [url])`: read cookies for a declared provider page origin, including HTTP-only service cookies when needed. This does not grant access to identity-provider domains.
+- `host.session('browser.navigate', [url])`: navigate to a declared provider page and wait for loading.
+- `host.request({transport:'BROWSER', ...})`: fetch inside the selected browser profile, with browser-managed cookies and session refresh. Browser mode supports normal browser CORS rules and rejects per-request HTTP proxies.
+- `host.request({transport:'HTTP', ...})`: use the shared HTTP client. Pass `proxy` explicitly when needed. Credential references are resolved by the host.
+- `host.account.fields` and `host.signal`: declared non-secret configuration and cancellation.
 
-export default definePlugin({
-  manifest,
-  providers: manifest.providers.map((manifest) => defineProvider({
-    manifest,
-    async generate(request, host) {
-      const result = await host.request<{ url: string }>({
-        url: 'https://your-provider.example/generate',
-        method: 'POST',
-        body: JSON.stringify(request.input),
-        responseType: 'JSON'
-      })
-      return {
-        ok: true,
-        media: {
-          kind: 'IMAGE',
-          mimeType: 'image/png',
-          source: { kind: 'URL', url: result.url }
-        }
-      }
-    }
-  }))
-})
-```
+The app prefers installed Chrome through Playwright and retains a dedicated persistent profile. The user-authorized startup fallback uses an existing WebView partition and is reported in Settings. Browser sessions are not copied between engines. A submitted provider request is never replayed through another engine.
 
-Declare the request and media origins in the manifest. Authenticated providers also implement `checkConnection(host)`. Use `host.page` for scoped WebView operations and a credential reference on `host.request` for API keys. `createTestHost` accepts mocked operations for local tests.
+Browser authentication may declare an `identityProvider` such as `GOOGLE` or `META` for selecting compatible shared profiles. The plugin still verifies service authorization. A Chrome profile is not a cookie export, and browser automation does not guarantee provider acceptance.
 
-The app downloads the package once and dispatches requests by `providerId`. Publish `plugin.zip` on a versioned public GitHub Release, then include it in the signed Script-Pro catalog. Flow Google and Vibes are separately packaged, while the repository's `example-suite` starter demonstrates a package with two providers.
+Use `createTestHost` for mocked contract/provider tests. Publish the built ZIP as a versioned GitHub Release and include its digest in the signed catalog. Provider code runs in a sandbox with no Node or Electron access.
 
-WebView authentication can declare an `identityProvider` such as `GOOGLE` or `META`. The host then offers compatible saved browser accounts or a new isolated session. The plugin still verifies its own service session; identity login does not imply service authorization. External browser OAuth callbacks are not part of contract v1.
-
-Providers can declare `logoUrl` and `websiteUrl` using HTTPS URLs (SDK and host 0.1.1 preview or newer). Settings renders the declared logo; package download and release links come from the verified catalog.
+Contract 2 replaces the host's old provider-specific session operations and `WEBVIEW` authentication/transport labels. Version 1 plugins require an update; a legacy job is not silently sent to a different implementation. Media output remains a final HTTPS URL from a declared origin; streaming/binary handles are not part of this contract.

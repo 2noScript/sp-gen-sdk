@@ -3,12 +3,12 @@
   "name": "Example Suite",
   "publisher": "2noScript",
   "version": "0.1.0",
-  "contractVersion": 1,
+  "contractVersion": 2,
   "providers": [
     {
       "providerId": "EXAMPLE_IMAGE",
       "version": "0.1.0",
-      "contractVersion": 1,
+      "contractVersion": 2,
       "name": "Example Image",
       "auth": {
         "kind": "NONE"
@@ -33,7 +33,7 @@
     {
       "providerId": "EXAMPLE_SECOND",
       "version": "0.1.0",
-      "contractVersion": 1,
+      "contractVersion": 2,
       "name": "Example Second",
       "auth": {
         "kind": "NONE"

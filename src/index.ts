@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const CONTRACT_VERSION = 1;
+export const CONTRACT_VERSION = 2;
 export const providerIdSchema = z.string().regex(/^[A-Z][A-Z0-9_-]{0,63}$/);
 export const versionSchema = z.string().regex(/^\d+\.\d+\.\d+$/);
 export const operationSchema = z.enum([
@@ -61,7 +61,7 @@ function matchesField(
 
 const operationDefinition = z
   .object({
-    transport: z.enum(["HTTP", "WEBVIEW"]),
+    transport: z.enum(["HTTP", "BROWSER"]),
     models: z
       .array(
         z.object({ id: z.string().min(1), label: z.string().min(1) }).strict(),
@@ -87,7 +87,7 @@ export const manifestSchema = z
       z.object({ kind: z.literal("API_KEY") }).strict(),
       z
         .object({
-          kind: z.literal("WEBVIEW"),
+          kind: z.literal("BROWSER"),
           identityProvider: z.string().regex(/^[A-Z][A-Z0-9_]*$/).optional(),
           loginUrl: httpsUrl,
           navigationOrigins: z.array(httpsOrigin).min(1),
@@ -112,13 +112,13 @@ export const manifestSchema = z
           !fieldsAreUnique(fields) ||
           fields.some(({ type }) => type === "SECRET") ||
           new Set(models.map(({ id }) => id)).size !== models.length ||
-          (transport === "WEBVIEW" && auth.kind !== "WEBVIEW"),
+          (transport === "BROWSER" && auth.kind !== "BROWSER"),
       ) ||
       (auth.kind === "API_KEY" &&
         !accountFields.some(
           ({ type, required }) => type === "SECRET" && required,
         )) ||
-      (auth.kind === "WEBVIEW" &&
+      (auth.kind === "BROWSER" &&
         (!auth.navigationOrigins.includes(new URL(auth.loginUrl).origin) ||
           auth.pageOrigins.some(
             (origin) => !auth.navigationOrigins.includes(origin),
@@ -234,6 +234,8 @@ export type ConnectionResult = z.infer<typeof connectionResultSchema>;
 export const httpRequestSchema = z
   .object({
     url: httpsUrl,
+    transport: z.enum(["HTTP", "BROWSER"]).default("HTTP"),
+    proxy: z.string().min(1).optional(),
     method: z.enum(["GET", "POST", "PUT", "DELETE", "PATCH"]).default("GET"),
     headers: z.record(z.string(), z.string()).optional(),
     body: z.string().optional(),
@@ -258,8 +260,8 @@ export interface PluginHost {
   };
   request<T = JsonValue>(request: PluginHttpRequest): Promise<T>;
   page<T = JsonValue>(script: string): Promise<T>;
-  /** Run a provider-specific Electron adapter operation for the selected profile. */
-  session<T = JsonValue>(operation: string, args?: JsonValue[]): Promise<T>;
+  /** Generic browser resources, scoped to the signed provider page origins. */
+  session<T = JsonValue>(operation: "browser.cookies" | "browser.navigate", args?: JsonValue[]): Promise<T>;
 }
 
 export interface GenerationProviderPlugin {

@@ -5,6 +5,11 @@ import { pluginManifestSchema } from "../dist/index.js";
 
 const [output, ...entries] = process.argv.slice(2);
 const pem = process.env.GENERATION_CATALOG_PRIVATE_KEY;
+const revision = Number(process.env.GENERATION_CATALOG_REVISION);
+if (!Number.isSafeInteger(revision) || revision < 1)
+  throw new Error(
+    "Set a positive GENERATION_CATALOG_REVISION for this release",
+  );
 if (!pem || !output || !entries.length || entries.length % 2) {
   throw new Error(
     "Set GENERATION_CATALOG_PRIVATE_KEY and provide <output> <bundle.zip> <release URL> pairs",
@@ -47,7 +52,7 @@ for (let index = 0; index < entries.length; index += 2) {
     sha256: createHash("sha256").update(bytes).digest("hex"),
   });
 }
-const payload = Buffer.from(JSON.stringify({ version: 1, releases }));
+const payload = Buffer.from(JSON.stringify({ version: 1, revision, releases }));
 await writeFile(
   output,
   JSON.stringify({
